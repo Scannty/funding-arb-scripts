@@ -28,6 +28,8 @@ async function getHyperliquidData(req, res) {
       continue;
     }
 
+    console.log(item);
+
     const response = await fetch("https://api.hyperliquid.xyz/info", {
       method: "POST",
       headers: {
@@ -46,12 +48,13 @@ async function getHyperliquidData(req, res) {
       totalFunding += Number(fundingItem.fundingRate);
     });
     totalFunding = totalFunding * 100;
-    console.log(fundingData.length);
     const avgFundingHrly = totalFunding / fundingData.length;
     const avgFundingYrly = avgFundingHrly * 24 * 365;
 
     topPerps.push({
       name: item.name,
+      assetIndex: index,
+      decimals: item.szDecimals,
       fundingHrly: Number(data[1][index]["funding"] * 100).toFixed(4),
       fundingYrly: Number(data[1][index]["funding"] * 100 * 24 * 365).toFixed(
         4
@@ -63,4 +66,21 @@ async function getHyperliquidData(req, res) {
   res.status(200).json(topPerps);
 }
 
-module.exports = { getHyperliquidData };
+async function getCurrentMidPrice(req, res) {
+  const { assetIndex } = req.query;
+  const response = await fetch("https://api.hyperliquid.xyz/info", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ type: "metaAndAssetCtxs" }),
+  });
+  const data = await response.json();
+
+  const targetPerp = data[1][assetIndex];
+  res.status(200).json({
+    midPrice: targetPerp.midPx,
+  });
+}
+
+module.exports = { getHyperliquidData, getCurrentMidPrice };
