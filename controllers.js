@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { getYearlyAvgFundingRate } = require("./data/fundingFeesCache");
 require("dotenv").config();
 
 async function getTopVolumePerps(req, res) {
@@ -125,7 +126,7 @@ async function getPerpsInfo(req, res) {
       totalFunding += Number(fundingItem.fundingRate);
     });
     totalFunding = totalFunding * 100;
-    const avgFundingHrly = totalFunding / fundingData.length;
+    const avgFundingHrly = getYearlyAvgFundingRate(item.name);
     const avgFundingYrly = avgFundingHrly * 24 * 365;
 
     perpsInfo.push({
@@ -136,7 +137,7 @@ async function getPerpsInfo(req, res) {
       fundingYrly: Number(data[1][index]["funding"] * 100 * 24 * 365).toFixed(
         4
       ),
-      fundingAvgMonthly: Number(avgFundingYrly).toFixed(4),
+      fundingAvgMonthly: Number(avgFundingYrly*100).toFixed(4),
     });
   }
 

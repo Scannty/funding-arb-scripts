@@ -15,3 +15,5 @@ app.post("/storeTradeData", controllers.storeTradeInfo);
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
 });
+
+require('./data/fundingFeesCache');
