@@ -81,6 +81,9 @@ const update = async (init) => {
                     last_timestamp = time;
                     added = true;
                 }
+                if (dataArray.length == 0) {
+                    last_timestamp += step;
+                }
 
 
                 const maxElements = 365 * 24;
