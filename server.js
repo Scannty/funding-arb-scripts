@@ -17,3 +17,4 @@ app.listen(8000, () => {
 });
 
 require('./data/fundingFeesCache');
+require('./db')

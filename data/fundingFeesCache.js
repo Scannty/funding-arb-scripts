@@ -1,26 +1,33 @@
+const { Token } = require('../db')
 const tokens = ['ETH', 'BTC', 'LINK', 'ARB', 'HYPE', 'PURR'];
 const fees = {};
 
 const updateTicker = async (ticker) => {
-    const fs = require('fs').promises;
-
     try {
-        await fs.writeFile(`./data/${ticker}.json`, JSON.stringify(fees[ticker], null, 2));
+        await Token.updateOne(
+            { ticker: ticker },
+            { $set: { fundingHistory: fees[ticker] } },
+            { upsert: true }
+        );
     } catch (error) {
         console.error(`Error saving ${ticker} fees: ${error}`);
     }
 }
 
 const loadTicker = async (ticker) => {
-    const fs = require('fs').promises;
-
     try {
-        const data = await fs.readFile(`./data/${ticker}.json`, 'utf8');
-        return JSON.parse(data);
+        let tokenDoc = await Token.findOne({ ticker: ticker });
+        if (!tokenDoc) {
+            tokenDoc = new Token({ ticker: ticker, fundingHistory: [] });
+            await tokenDoc.save();
+        }
+        return tokenDoc.fundingHistory;
     } catch (error) {
+        console.error(`Error loading ${ticker} from DB: ${error}`);
         return [];
     }
 }
+
 
 const update = async (init) => {
     for (const ticker of tokens) {
