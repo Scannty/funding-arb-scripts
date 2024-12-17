@@ -11,7 +11,8 @@ app.get("/getTopVolumePerps", controllers.getTopVolumePerps);
 app.get("/getCurrentMidPrice", controllers.getCurrentMidPrice);
 app.get("/getPerpsInfo", controllers.getPerpsInfo);
 app.post("/storeTradeData", controllers.storeTradeInfo);
-app.get("/api/v1/dex/1inch/quote", controllers.get1inchSwapQuote);
+app.get("/api/v1/dex/1inch/swap", controllers.get1inchSwapQuote);
+app.get("/api/v1/dex/1inch/quote", controllers.get1inchQuote);
 
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
