@@ -196,10 +196,36 @@ async function get1inchSwapQuote(req, res) {
   }
 }
 
+async function get1inchQuote(req, res) {
+  const { endpoint, ...params } = req.query;
+  try {
+    const baseURL = `https://api.1inch.dev/swap/v6.0/42161/quote`;
+    const url = new URL(baseURL);
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) url.searchParams.append(key, value.toString());
+    });
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${process.env.ONE_INCH_API_KEY}`,
+        Accept: "application/json",
+      },
+    });
+
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to fetch quote" });
+  }
+}
+
 module.exports = {
   getTopVolumePerps,
   getCurrentMidPrice,
   getPerpsInfo,
   storeTradeInfo,
   get1inchSwapQuote,
+  get1inchQuote
 };
