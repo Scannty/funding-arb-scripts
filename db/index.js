@@ -6,7 +6,7 @@ mongoose.connect('mongodb://localhost:27017/funding', {
 });
 
 const tokenSchema = new mongoose.Schema({
-    ticker: { type: String, required: true, unique: true }, 
+    ticker: { type: String, required: true }, 
     fundingHistory: { type: Array, default: [] },
 });
 

@@ -137,7 +137,7 @@ async function getPerpsInfo(req, res) {
       fundingYrly: Number(data[1][index]["funding"] * 100 * 24 * 365).toFixed(
         4
       ),
-      fundingAvgMonthly: Number(avgFundingYrly*100).toFixed(4),
+      fundingAvgMonthly: Number(avgFundingYrly * 100).toFixed(4),
     });
   }
 
@@ -167,9 +167,39 @@ function storeTradeInfo(req, res) {
   res.status(200).json({ message: "Trade info stored successfully!" });
 }
 
+async function get1inchSwapQuote(req, res) {
+  const { endpoint, ...params } = req.query;
+
+  try {
+    const baseURL = `https://api.1inch.dev/swap/v6.0/42161/${endpoint}`;
+    const url = new URL(baseURL);
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) url.searchParams.append(key, value.toString());
+    });
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${process.env.ONE_INCH_API_KEY}`,
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API call failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching 1inch swap quote:", error);
+    res.status(500).json({ error: "Failed to fetch swap quote from 1inch" });
+  }
+}
+
 module.exports = {
   getTopVolumePerps,
   getCurrentMidPrice,
   getPerpsInfo,
   storeTradeInfo,
+  get1inchSwapQuote,
 };
