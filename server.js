@@ -14,6 +14,10 @@ app.post("/storeTradeData", controllers.storeTradeInfo);
 app.get("/api/v1/dex/1inch/swap", controllers.get1inchSwapQuote);
 app.get("/api/v1/dex/1inch/quote", controllers.get1inchQuote);
 
+app.get("/api/storage/get-portfolio/:user_address", controllers.getPortfolio);
+app.post("/api/storage/store-position", controllers.storePosition);
+app.post("/api/storage/delete-position", controllers.deletePosition);
+
 app.listen(8000, () => {
   console.log("Server is listening on port 8000");
 });

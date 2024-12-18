@@ -1,5 +1,6 @@
 const fs = require("fs");
 const { getYearlyAvgFundingRate } = require("./data/fundingFeesCache");
+const { getPortfolioInfo, updatePosition, closePosition } = require("./db/helpers");
 require("dotenv").config();
 
 async function getTopVolumePerps(req, res) {
@@ -201,7 +202,7 @@ async function get1inchQuote(req, res) {
   try {
     const baseURL = `https://api.1inch.dev/swap/v6.0/42161/quote`;
     const url = new URL(baseURL);
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value) url.searchParams.append(key, value.toString());
     });
@@ -221,11 +222,64 @@ async function get1inchQuote(req, res) {
   }
 }
 
+async function getPortfolio(req, res) {
+  try {
+    const user_address = req.params.user_address;
+    const portfolio = await getPortfolioInfo(user_address);
+    return res.json({ ok: true, portfolio });
+  } catch (error) {
+    console.error("Error in getPositions:", error);
+    return res.status(500).json({ ok: false, message: "Internal Server Error" });
+  }
+}
+
+async function storePosition(req, res) {
+  try {
+    const { user_address, asset, spot_amount, perp_size, leverage } = req.body;
+
+    if (!user_address || !asset || !spot_amount || !perp_size || !leverage) {
+      return res.status(400).json({
+        ok: false,
+        message: "Missing required fields (user_address, asset, spot_amount, perp_size, leverage)"
+      });
+    }
+
+    const result = await updatePosition({ user_address, asset, spot_amount, perp_size, leverage });
+    return res.json(result);
+  } catch (error) {
+    console.error("Error in storePosition:", error);
+    return res.status(500).json({ ok: false, message: "Internal Server Error" });
+  }
+}
+
+async function deletePosition(req, res) {
+  try {
+    const { user_address, asset } = req.body;
+
+    if (!user_address || !asset) {
+      return res.status(400).json({
+        ok: false,
+        message: "Missing required fields (user_address, asset)"
+      });
+    }
+
+    const result = await closePosition({ user_address, asset });
+    return res.json(result);
+  } catch (error) {
+    console.error("Error in deletePosition:", error);
+    return res.status(500).json({ ok: false, message: "Internal Server Error" });
+  }
+}
+
+
 module.exports = {
   getTopVolumePerps,
   getCurrentMidPrice,
   getPerpsInfo,
   storeTradeInfo,
   get1inchSwapQuote,
-  get1inchQuote
+  get1inchQuote,
+  getPortfolio,
+  storePosition,
+  deletePosition
 };
