@@ -74,7 +74,8 @@ async function getTopVolumePerps(req, res) {
 }
 
 async function getCurrentMidPrice(req, res) {
-  const { assetIndex } = req.query;
+  const { assetIndexes } = req.query;
+  const assetIndexesArray = assetIndexes.split(",").map(Number);
   const response = await fetch("https://api.hyperliquid.xyz/info", {
     method: "POST",
     headers: {
@@ -84,10 +85,17 @@ async function getCurrentMidPrice(req, res) {
   });
   const data = await response.json();
 
-  const targetPerp = data[1][assetIndex];
-  res.status(200).json({
-    midPrice: targetPerp.midPx,
+  const perpPrices = {};
+  assetIndexesArray.forEach((assetIndex) => {
+    const targetPerp = data[1][assetIndex];
+    if (!targetPerp) {
+      perpPrices[assetIndex] = 0;
+    } else {
+      perpPrices[assetIndex] = targetPerp.midPx;
+    }
   });
+
+  res.status(200).json(perpPrices);
 }
 
 async function getPerpsInfo(req, res) {
@@ -242,9 +250,17 @@ async function getPortfolio(req, res) {
 
 async function storePosition(req, res) {
   try {
-    const { user_address, asset, spot_amount, perp_size, leverage, amount } = req.body;
+    const { user_address, asset, spot_amount, perp_size, leverage, amount } =
+      req.body;
 
-    if (!user_address || !asset || !spot_amount || !perp_size || !leverage || !amount) {
+    if (
+      !user_address ||
+      !asset ||
+      !spot_amount ||
+      !perp_size ||
+      !leverage ||
+      !amount
+    ) {
       return res.status(400).json({
         ok: false,
         message:
@@ -258,7 +274,7 @@ async function storePosition(req, res) {
       spot_amount,
       perp_size,
       leverage,
-      amount
+      amount,
     });
     return res.json(result);
   } catch (error) {
