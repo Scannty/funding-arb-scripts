@@ -18,6 +18,7 @@ const positionSchema = new mongoose.Schema({
     spot_amount: { type: String, required: true },
     perp_size: { type: String, required: true }, 
     leverage: { type: String, required: true },
+    amount:  { type: String, required: true }
 })
 
 positionSchema.index({ user_address: 1 }, { unique: false });

@@ -17,6 +17,7 @@ async function updatePosition({
   spot_amount,
   perp_size,
   leverage,
+  amount
 }) {
   let existingPosition = await Position.findOne({ user_address, asset });
 
@@ -35,9 +36,13 @@ async function updatePosition({
     const newPerpSize = (
       parseFloat(existingPosition.perp_size) + parseFloat(perp_size)
     ).toString();
+    const newAmount = (
+      parseFloat(existingPosition.amount) + parseFloat(amount)
+    ).toString();
 
     existingPosition.spot_amount = newSpotAmount;
     existingPosition.perp_size = newPerpSize;
+    existingPosition.amount = newAmount;
     await existingPosition.save();
 
     return {
@@ -52,6 +57,7 @@ async function updatePosition({
       spot_amount: BigInt(spot_amount).toString(),
       perp_size: perp_size.toString(),
       leverage,
+      amount
     });
     await newPosition.save();
 

@@ -242,13 +242,13 @@ async function getPortfolio(req, res) {
 
 async function storePosition(req, res) {
   try {
-    const { user_address, asset, spot_amount, perp_size, leverage } = req.body;
+    const { user_address, asset, spot_amount, perp_size, leverage, amount } = req.body;
 
-    if (!user_address || !asset || !spot_amount || !perp_size || !leverage) {
+    if (!user_address || !asset || !spot_amount || !perp_size || !leverage || !amount) {
       return res.status(400).json({
         ok: false,
         message:
-          "Missing required fields (user_address, asset, spot_amount, perp_size, leverage)",
+          "Missing required fields (user_address, asset, spot_amount, perp_size, leverage, amount)",
       });
     }
 
@@ -258,6 +258,7 @@ async function storePosition(req, res) {
       spot_amount,
       perp_size,
       leverage,
+      amount
     });
     return res.json(result);
   } catch (error) {
