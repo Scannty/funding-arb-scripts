@@ -189,7 +189,10 @@ async function get1inchSwapQuote(req, res) {
     Object.entries(params).forEach(([key, value]) => {
       if (value) url.searchParams.append(key, value.toString());
     });
+    //url.searchParams.append("disableEstimate", "true");
 
+    console.log(url);
+    console.log(process.env.ONE_INCH_API_KEY);
     const response = await fetch(url.toString(), {
       headers: {
         Authorization: `Bearer ${process.env.ONE_INCH_API_KEY}`,
@@ -205,6 +208,8 @@ async function get1inchSwapQuote(req, res) {
     res.status(200).json(data);
   } catch (error) {
     console.error("Error fetching 1inch swap quote:", error);
+    console.log(error);
+    console.error(error);
     res.status(500).json({ error: "Failed to fetch swap quote from 1inch" });
   }
 }

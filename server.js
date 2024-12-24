@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const controllers = require("./controllers");
+const path = require('path');
 
 const app = express();
 
@@ -17,8 +18,12 @@ app.get("/api/v1/dex/1inch/quote", controllers.get1inchQuote);
 app.get("/api/storage/get-portfolio/:user_address", controllers.getPortfolio);
 app.post("/api/storage/store-position", controllers.storePosition);
 app.post("/api/storage/delete-position", controllers.deletePosition);
+app.use(express.static(path.join(__dirname, 'build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname + '/build/index.html'));
+});
 
-app.listen(8000, () => {
+app.listen(process.env.production ? 80 : 8000, () => {
   console.log("Server is listening on port 8000");
 });
 

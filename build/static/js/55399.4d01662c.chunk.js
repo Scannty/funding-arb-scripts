@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkfunding_arb_ui=self.webpackChunkfunding_arb_ui||[]).push([[55399],{55399:(a,r,l)=>{l.r(r),l.d(r,{default:()=>h});var e=l(27051),f=l(53986),n=l(9079),u=l(65043),c=l(70579);const s=["fallback"];var d=(0,u.forwardRef)(((a,r)=>{let{fallback:l}=a,u=(0,f.A)(a,s);return(0,c.jsx)(n.h,(0,e.A)((0,e.A)({fallback:l},u),{},{ref:r,children:(0,c.jsx)("path",{fill:"currentColor",d:"M2 2h20v3.571H5.571v2.143H22v3.572H2zm0 10.714h20v3.572H5.571v2.142H22V22H2z"})}))}));d.displayName="TokenEUROE";var h=d}}]);
+//# sourceMappingURL=55399.4d01662c.chunk.js.map
