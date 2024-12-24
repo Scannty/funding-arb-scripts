@@ -210,27 +210,84 @@ async function get1inchSwapQuote(req, res) {
 }
 
 async function get1inchQuote(req, res) {
-  const { endpoint, ...params } = req.query;
+  const { endpoint, src, dst, amount, account } = req.query;
+
   try {
-    const baseURL = `https://api.1inch.dev/swap/v6.0/42161/quote`;
-    const url = new URL(baseURL);
+    if (!src || !dst || !amount) {
+      return res
+        .status(400)
+        .json({ error: "Missing required query params: src, dst, amount" });
+    }
 
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) url.searchParams.append(key, value.toString());
-    });
+    // Construct the POST body for DefiSaver
+    const requestBody = {
+      fromAsset: src,
+      fromAssetDecimals: 18, // If needed, adjust or remove decimals if not required
+      fromAssetSymbol: "UNKNOWN", // Adjust if your code does not rely on these
+      toAsset: dst,
+      toAssetDecimals: 6, // Adjust if needed
+      toAssetSymbol: "UNKNOWN",
+      sources: ["1inch"],
+      chainId: 42161, // Arbitrum chainId
+      amount: amount,
+      excludedSources: [],
+      infoOnly: false,
+      account: account || "0x0000000000000000000000000000000000000000",
+    };
 
-    const response = await fetch(url.toString(), {
+    // Fetch from the new provider (DefiSaver)
+    const response = await fetch(process.env.QUOTE_ENDPOINT, {
+      method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.ONE_INCH_API_KEY}`,
-        Accept: "application/json",
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(requestBody),
     });
 
-    const data = await response.json();
-    res.status(200).json(data);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error fetching best price:", errorText);
+      return res
+        .status(response.status)
+        .json({ error: "Failed to fetch quote" });
+    }
+
+    const defisaverData = await response.json();
+    const bestQuote = defisaverData[0];
+
+    if (!bestQuote) {
+      return res.status(500).json({ error: "No quote returned from provider" });
+    }
+
+    // Minimal changes: return fields needed. The code that uses this function references `data.dstAmount`.
+    // We include `dstAmount` and any other fields you might need from the original structure.
+    // Add or remove fields as needed to match your original 1inch response.
+    const transformedData = {
+      dstAmount: bestQuote.dstAmount,
+      fromTokenAmount: requestBody.amount,
+      toTokenAmount: bestQuote.dstAmount, // If you originally used toTokenAmount, map it here
+      protocols: bestQuote.protocols || [],
+      fromToken: {
+        symbol: requestBody.fromAssetSymbol,
+        name: "Placeholder", // Adjust if your code requires these fields
+        address: requestBody.fromAsset,
+        decimals: requestBody.fromAssetDecimals,
+        logoURI: "",
+      },
+      toToken: {
+        symbol: requestBody.toAssetSymbol,
+        name: "Placeholder",
+        address: requestBody.toAsset,
+        decimals: requestBody.toAssetDecimals,
+        logoURI: "",
+      },
+      estimatedGas: "0", // 1inch provided this, DefiSaver might not. Set a fallback.
+    };
+
+    return res.status(200).json(transformedData);
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Failed to fetch quote" });
+    return res.status(500).json({ error: "Failed to fetch quote" });
   }
 }
 
